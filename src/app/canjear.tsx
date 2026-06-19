@@ -1,15 +1,16 @@
-import { Ionicons } from "@expo/vector-icons";
+import CabeceraSaldo from "@/components/CabeceraSaldo";
+import CardRecompensas from "@/components/CardRecompensas";
 import { useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Datos de prueba (Mock data)
+// datos de prueba -> api
 const RECOMPENSAS = [
   {
     id: "1",
@@ -51,7 +52,6 @@ const RECOMPENSAS = [
 export default function CanjearScreen() {
   const [categoriaActiva, setCategoriaActiva] = useState("Todos");
 
-  // Filtramos la lista según la categoría seleccionada
   const recompensasFiltradas =
     categoriaActiva === "Todos"
       ? RECOMPENSAS
@@ -63,16 +63,9 @@ export default function CanjearScreen() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. CABECERA DE SALDO */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceTitle}>Tu saldo disponible</Text>
-          <View style={styles.balanceRow}>
-            <Ionicons name="leaf" size={28} color="#6b9e59" />
-            <Text style={styles.balancePoints}>3350 pts</Text>
-          </View>
-        </View>
+        <CabeceraSaldo />
 
-        {/* 2. FILTROS RÁPIDOS */}
+        {/* 2. FILTROS DE CATEGORÍA */}
         <Text style={styles.sectionTitle}>Categorías</Text>
         <ScrollView
           horizontal
@@ -100,29 +93,10 @@ export default function CanjearScreen() {
           ))}
         </ScrollView>
 
-        {/* 3. LISTA DE RECOMPENSAS */}
         <Text style={styles.sectionTitle}>Recompensas Disponibles</Text>
-        <View style={styles.rewardsGrid}>
-          {recompensasFiltradas.map((item) => (
-            <View key={item.id} style={styles.rewardCard}>
-              <View style={styles.rewardIconContainer}>
-                <Ionicons name={item.icono as any} size={32} color="#6b9e59" />
-              </View>
-              <View style={styles.rewardInfo}>
-                <Text style={styles.rewardTitle}>{item.titulo}</Text>
-                <Text style={styles.rewardType}>{item.tipo}</Text>
-              </View>
-              <View style={styles.rewardAction}>
-                <Text style={styles.rewardCost}>{item.puntos} pts</Text>
-                <TouchableOpacity style={styles.redeemButton}>
-                  <Text style={styles.redeemButtonText}>Canjear</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
 
-        {/* Espacio para que el menú inferior no tape el contenido */}
+        <CardRecompensas recompensasFiltradas={recompensasFiltradas} />
+
         <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>

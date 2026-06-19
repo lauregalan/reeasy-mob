@@ -9,10 +9,7 @@ export default function GraphCard() {
 
       <View style={styles.chartPlaceholder}>
         <Ionicons name="bar-chart-outline" size={60} color="#B0C4DE" />
-        <Text style={styles.chartText}>Aquí irá el gráfico de barras</Text>
-        <Text style={styles.chartSubText}>
-          (Ej: Usando react-native-chart-kit)
-        </Text>
+        <Text style={styles.chartText}>gráfico de barras</Text>
       </View>
     </View>
   );

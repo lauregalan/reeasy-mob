@@ -8,7 +8,6 @@ import HeaderDashboard from "../components/HeaderDashboard";
 export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Usamos ScrollView por si la pantalla de un celular es chica y necesita scrollear */}
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}

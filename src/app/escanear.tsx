@@ -1,19 +1,26 @@
+import ScanResult, { ApiOutput } from "@/components/ScanResult";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function EscanearScreen() {
-  // Hook de Expo para manejar los permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
 
-  // 1. Estado de carga inicial de permisos
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [apiResult, setApiResult] = useState<ApiOutput | null>(null);
+
   if (!permission) {
-    return <View style={styles.container} />;
+    return <View style={styles.containerBlack} />;
   }
 
-  // 2. Si el usuario todavía no dio permiso o lo denegó
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
@@ -32,31 +39,66 @@ export default function EscanearScreen() {
     );
   }
 
-  // Función para capturar la foto
   const tomarFoto = async () => {
-    if (cameraRef.current) {
-      // El '?' previene errores si current llega a ser undefined en ese milisegundo
-      const foto = await cameraRef.current?.takePictureAsync({
-        quality: 0.5,
-        base64: true,
-      });
-      console.log("¡Foto capturada!", foto?.uri);
+    if (cameraRef.current && !isAnalyzing) {
+      try {
+        setIsAnalyzing(true);
+        const foto = await cameraRef.current.takePictureAsync({
+          quality: 0.5,
+          base64: true,
+        });
+
+        //aca hacer el fetch con la api
+
+        //mock de ejemplo
+        setTimeout(() => {
+          setApiResult({
+            date: "2026-06-19T21:37:14.164+00:00",
+            data: [{ type: "PET-1", amount: 1 }],
+            image: foto?.base64 || "",
+          });
+          setIsAnalyzing(false);
+        }, 1500);
+      } catch (error) {
+        console.error("Error al capturar/enviar la foto:", error);
+        setIsAnalyzing(false);
+      }
     }
   };
-  // 3. La vista principal con la cámara activa
-  return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} facing="back" ref={cameraRef}>
-        {/* Capa visual oscura con el recuadro transparente en el medio */}
-        <View style={styles.overlay}>
-          <View style={styles.scanFrame} />
-          <Text style={styles.scanText}>Centrá la botella en el recuadro</Text>
-        </View>
 
-        {/* Controles inferiores (Botón de captura) */}
+  const reiniciarEscaner = () => {
+    setApiResult(null);
+  };
+
+  //si hay resultado de la api mostramos el componente ScanResult, sino mostramos la cámara
+  if (apiResult) {
+    return <ScanResult result={apiResult} onReset={reiniciarEscaner} />;
+  }
+
+  return (
+    <View style={styles.containerBlack}>
+      <CameraView style={styles.camera} facing="back" ref={cameraRef}>
+        <TouchableOpacity style={styles.closeButton}>
+          <Ionicons name="close" size={32} color="#FFF" />
+        </TouchableOpacity>
+        <View style={styles.scanAreaContainer}>
+          <View style={styles.scanSquare}>
+            <View style={[styles.corner, styles.topLeftCorner]} />
+            <View style={[styles.corner, styles.topRightCorner]} />
+            <View style={[styles.corner, styles.bottomLeftCorner]} />
+            <View style={[styles.corner, styles.bottomRightCorner]} />
+            {isAnalyzing && <ActivityIndicator size="large" color="#4A90E2" />}
+          </View>
+        </View>
         <View style={styles.controlsContainer}>
-          <TouchableOpacity style={styles.captureButton} onPress={tomarFoto}>
-            <View style={styles.captureButtonInner} />
+          <TouchableOpacity
+            style={styles.captureButtonOuter}
+            onPress={tomarFoto}
+            disabled={isAnalyzing}
+          >
+            <View style={styles.captureButtonInner}>
+              <Ionicons name="camera" size={28} color="#000" />
+            </View>
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -65,16 +107,20 @@ export default function EscanearScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  containerBlack: {
     flex: 1,
     backgroundColor: "#000",
   },
-  /* --- ESTILOS DE PERMISO --- */
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F7FFF2",
+  },
+  // permisos
   permissionContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0A110D", // Estilo oscuro que venimos manejando
+    backgroundColor: "#0A110D",
     padding: 20,
   },
   permissionText: {
@@ -97,52 +143,81 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  /* --- ESTILOS DE LA CÁMARA --- */
+
+  // camara
   camera: {
     flex: 1,
   },
-  overlay: {
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  scanAreaContainer: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)", // Fondo semitransparente oscuro
     justifyContent: "center",
     alignItems: "center",
   },
-  scanFrame: {
-    width: 250,
-    height: 350,
-    borderWidth: 2,
-    borderColor: "#95D5B2",
-    backgroundColor: "transparent", // El agujero para ver la botella
-    borderRadius: 12,
+  scanSquare: {
+    width: 280,
+    height: 380,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  scanText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "500",
-    marginTop: 20,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+  corner: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    borderColor: "#4A90E2",
+    borderWidth: 3,
   },
+  topLeftCorner: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0 },
+  topRightCorner: {
+    top: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+  },
+  bottomLeftCorner: {
+    bottom: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+  },
+  bottomRightCorner: {
+    bottom: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+  },
+
   controlsContainer: {
     position: "absolute",
     bottom: 40,
     width: "100%",
     alignItems: "center",
-    paddingBottom: 80, // Espacio para que no pise el menú inferior
+    paddingBottom: 80,
   },
-  captureButton: {
+  captureButtonOuter: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "transparent",
     justifyContent: "center",
     alignItems: "center",
   },
   captureButtonInner: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });
