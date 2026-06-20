@@ -90,6 +90,9 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen name="carrito" options={{ href: null }} />
+      <Tabs.Screen name="invitar" options={{ href: null }} />
     </Tabs>
   );
 }

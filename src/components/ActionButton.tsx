@@ -1,18 +1,37 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function ActionButton() {
+  const routeToCart = () => {
+    console.log("Navegar a carrito");
+  };
+
   return (
     <View style={styles.actionRow}>
-      <TouchableOpacity style={styles.actionButton}>
+      {/* 3. Sacamos el <Link> y usamos el onPress directamente en el Pressable */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.actionButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={() => router.push("/carrito")}
+      >
         <Ionicons name="cart-outline" size={28} color="#FFF" />
         <Text style={styles.actionButtonText}>Ver carrito</Text>
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity style={[styles.actionButton, styles.inviteButton]}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.actionButton,
+          styles.inviteButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={() => router.push("/invitar")}
+      >
         <Ionicons name="share-social-outline" size={28} color="#FFF" />
         <Text style={styles.actionButtonText}>Invita un amigo</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
