@@ -49,16 +49,41 @@ export default function EscanearScreen() {
         });
 
         //aca hacer el fetch con la api
+        try {
+          const res = await fetch("http://192.168.1.7:8090/recycling/scan", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image: foto?.base64 || "",
+            }),
+          });
+
+          if (res.status === 400) {
+            throw new Error("No se detectó ningún envase en la imagen.");
+          }
+
+          const data = await res.json();
+          setApiResult(data);
+
+          console.log(data.data);
+        } catch (error) {
+          console.error("Error al obtener data de la api:", error);
+        }
+
+        setIsAnalyzing(false);
 
         //mock de ejemplo
-        setTimeout(() => {
-          setApiResult({
-            date: "2026-06-19T21:37:14.164+00:00",
-            data: [{ type: "PET-1", amount: 1 }],
-            image: foto?.base64 || "",
-          });
-          setIsAnalyzing(false);
-        }, 1500);
+        // setTimeout(() => {
+        //   setApiResult({
+        //     date: "2026-06-19T21:37:14.164+00:00",
+        //     data: [{ type: "PET-1", amount: 1 }],
+        //     image: foto?.base64 || "",
+        //   });
+        //   setIsAnalyzing(false);
+        // }, 1500);
+
       } catch (error) {
         console.error("Error al capturar/enviar la foto:", error);
         setIsAnalyzing(false);
