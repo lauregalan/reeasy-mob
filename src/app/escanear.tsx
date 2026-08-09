@@ -50,7 +50,7 @@ export default function EscanearScreen() {
 
         //aca hacer el fetch con la api
         try {
-          const res = await fetch("http://192.168.1.7:8090/recycling/scan", {
+          const res = await fetch("https://easy.veloso.net.ar/recycling/scan", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
