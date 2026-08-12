@@ -1,6 +1,7 @@
 import ScanResult, { ApiOutput } from "@/components/ScanResult";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,11 +12,20 @@ import {
 } from "react-native";
 
 export default function EscanearScreen() {
+  const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiResult, setApiResult] = useState<ApiOutput | null>(null);
+
+  const cerrarCamara = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   if (!permission) {
     return <View style={styles.containerBlack} />;
@@ -24,6 +34,9 @@ export default function EscanearScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
+        <TouchableOpacity style={styles.closeButton} onPress={cerrarCamara} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Ionicons name="close" size={32} color="#FFF" />
+        </TouchableOpacity>
         <Ionicons name="camera-outline" size={60} color="#95D5B2" />
         <Text style={styles.permissionText}>
           Necesitamos acceso a tu cámara para poder escanear las botellas y
@@ -74,16 +87,6 @@ export default function EscanearScreen() {
 
         setIsAnalyzing(false);
 
-        //mock de ejemplo
-        // setTimeout(() => {
-        //   setApiResult({
-        //     date: "2026-06-19T21:37:14.164+00:00",
-        //     data: [{ type: "PET-1", amount: 1 }],
-        //     image: foto?.base64 || "",
-        //   });
-        //   setIsAnalyzing(false);
-        // }, 1500);
-
       } catch (error) {
         console.error("Error al capturar/enviar la foto:", error);
         setIsAnalyzing(false);
@@ -103,7 +106,11 @@ export default function EscanearScreen() {
   return (
     <View style={styles.containerBlack}>
       <CameraView style={styles.camera} facing="back" ref={cameraRef}>
-        <TouchableOpacity style={styles.closeButton}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={cerrarCamara}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="close" size={32} color="#FFF" />
         </TouchableOpacity>
         <View style={styles.scanAreaContainer}>
