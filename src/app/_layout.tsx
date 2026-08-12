@@ -54,6 +54,7 @@ export default function TabLayout() {
         name="escanear"
         options={{
           title: "",
+          tabBarStyle: { display: "none" },
           tabBarButton: (props) => <CustomCameraButton {...props} />,
         }}
       />
