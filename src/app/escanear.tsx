@@ -68,6 +68,7 @@ export default function EscanearScreen() {
         const foto = await cameraRef.current.takePictureAsync({
           quality: 0.5,
           base64: true,
+          shutterSound: false,
         });
 
         //aca hacer el fetch con la api
