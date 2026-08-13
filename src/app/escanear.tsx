@@ -148,7 +148,7 @@ export default function EscanearScreen() {
         <View style={styles.loaderOverlay} pointerEvents="none">
           <View style={styles.loaderCard}>
             <ActivityIndicator size="large" color="#95D5B2" />
-            <Text style={styles.loaderText}>Analizando envase...</Text>
+            <Text style={styles.loaderText}>Analizando envases...</Text>
           </View>
         </View>
       )}
